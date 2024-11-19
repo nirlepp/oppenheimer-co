@@ -1,0 +1,105 @@
+apiVersion: storage.dell.com/v1
+kind: ContainerStorageModule
+metadata:
+  name: unity
+  namespace: unity
+spec:
+  driver:
+    csiDriverType: "unity"
+    csiDriverSpec:
+      fSGroupPolicy: "ReadWriteOnceWithFSType"
+      storageCapacity: true
+    configVersion: v2.11.1
+    replicas: 2
+    dnsPolicy: ClusterFirstWithHostNet
+    forceUpdate: false
+    forceRemoveDriver: true
+    common:
+      image: "registry.connect.redhat.com/dell-emc/csi-unity@sha256:7f2abaf2c6dd92abc2824f4adc0aac929844452692e9c99cd7cdb99df1f7e129"
+      imagePullPolicy: IfNotPresent
+      envs:
+        - name: X_CSI_UNITY_ALLOW_MULTI_POD_ACCESS
+          value: "false"
+        - name: X_CSI_EPHEMERAL_STAGING_PATH
+          value: "/var/lib/kubelet/plugins/kubernetes.io/csi/pv/"
+        - name: X_CSI_ISCSI_CHROOT
+          value: "/noderoot"
+        - name: X_CSI_UNITY_SYNC_NODEINFO_INTERVAL
+          value: "15"
+        - name: KUBELET_CONFIG_DIR
+          value: /var/lib/kubelet
+        - name: CSI_LOG_LEVEL
+          value: debug
+        - name: CSI_LOG_FORMAT
+          value: "TEXT"
+        - name: TENANT_NAME
+          value: ""
+        - name: CERT_SECRET_COUNT
+          value: "1"
+        - name: X_CSI_UNITY_SKIP_CERTIFICATE_VALIDATION
+          value: "true"
+    sideCars:
+      - name: provisioner
+        image: registry.k8s.io/sig-storage/csi-provisioner@sha256:405a14e1aa702f7ea133cea459e8395fe40a6125c088c55569e696d48e1bd385
+        args: ["--volume-name-prefix=csivol"]
+      - name: attacher
+        image: registry.k8s.io/sig-storage/csi-attacher@sha256:b4d611100ece2f9bc980d1cb19c2285b8868da261e3b1ee8f45448ab5512ab94
+      - name: registrar
+        image: registry.k8s.io/sig-storage/csi-node-driver-registrar@sha256:f25af73ee708ff9c82595ae99493cdef9295bd96953366cddf36305f82555dac
+      - name: resizer
+        image: registry.k8s.io/sig-storage/csi-resizer@sha256:a541e6cc2d8b011bb21b1d4ffec6b090e85270cce6276ee302d86153eec0af43
+      - name: snapshotter
+        image: registry.k8s.io/sig-storage/csi-snapshotter@sha256:2e04046334baf9be425bb0fa1d04c2d1720d770825eedbdbcdb10d430da4ad8c
+      - name: csi-metadata-retriever
+        image: registry.connect.redhat.com/dell-emc/csi-metadata-retriever@sha256:abf97fc03ff59147ef0cd9ec3e58fcd5ef499aa9c13da53a8b99731884cb87d9
+      - name: external-health-monitor
+        # Uncomment the following to configure how often external-provisioner polls the driver to detect changed capacity
+        # Configure when the storageCapacity is set as "true"
+        # Allowed values: 1m,2m,3m,...,10m,...,60m etc. Default value: 5m
+        # - name: provisioner
+        #  args: ["--capacity-poll-interval=5m"]
+
+        enabled: false
+        args: ["--monitor-interval=60s"]
+        image: registry.k8s.io/sig-storage/csi-external-health-monitor-controller@sha256:97e806babd29424737464aaafdc3ede91119c077ddc0b7ecf423c5dca4833d84
+    controller:
+      envs:
+        - name: X_CSI_HEALTH_MONITOR_ENABLED
+          value: "false"
+      nodeSelector:
+      # Uncomment if nodes you wish to use have the node-role.kubernetes.io/control-plane taint
+      #  node-role.kubernetes.io/control-plane: ""
+
+      # tolerations: Define tolerations for the controllers, if required.
+      # Leave as blank to install controller on worker nodes
+      # Default value: None
+      tolerations:
+      # Uncomment if nodes you wish to use have the node-role.kubernetes.io/control-plane taint
+      # - key: "node-role.kubernetes.io/control-plane"
+      #   operator: "Exists"
+      #   effect: "NoSchedule"
+    node:
+      envs:
+        # Default value: false
+        - name: X_CSI_HEALTH_MONITOR_ENABLED
+          value: "false"
+        - name: X_CSI_ALLOWED_NETWORKS
+          value: ""
+      # nodeSelector: Define node selection constraints for node pods.
+      # For the pod to be eligible to run on a node, the node must have each
+      # of the indicated key-value pairs as labels.
+      # Leave as blank to consider all nodes
+      # Allowed values: map of key-value pairs
+      # Default value: None
+      nodeSelector:
+      # Uncomment if nodes you wish to use have the node-role.kubernetes.io/control-plane taint
+      #  node-role.kubernetes.io/control-plane: ""
+
+      # tolerations: Define tolerations for the controllers, if required.
+      # Leave as blank to install controller on worker nodes
+      # Default value: None
+      tolerations:
+      # Uncomment if nodes you wish to use have the node-role.kubernetes.io/control-plane taint
+      # - key: "node-role.kubernetes.io/control-plane"
+      #   operator: "Exists"
+      #   effect: "NoSchedule"

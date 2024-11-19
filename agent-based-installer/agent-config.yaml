@@ -1,0 +1,163 @@
+apiVersion: v1beta1
+kind: AgentConfig
+metadata:
+  name: tx1-ocp-02
+#The rendezvousIP must be assigned to a host with the master role
+rendezvousIP: 10.1.90.13
+hosts:
+  - hostname: compute0
+    role: master
+    interfaces:
+      - name: eno1
+        macAddress: 24:6e:96:27:44:a0
+      - name: eno2
+        macAddress: 24:6e:96:27:44:a1
+      - name: eno3
+        macAddress: 24:6e:96:27:44:a2
+      - name: eno4
+        macAddress: 24:6e:96:27:44:a3
+    networkConfig:
+      interfaces:
+        - name: bond0.90
+          type: vlan
+          state: up
+          vlan:
+            base-iface: bond0
+            id: 90
+            protocol: 802.1q
+          ipv4:
+            enabled: true
+            address:
+              - ip: 10.1.90.13
+                prefix-length: 24
+            dhcp: false
+        - name: bond0
+          description: bond eno1 eno2 eno3 eno4
+          type: bond
+          state: up
+          mac-address: 24:6e:96:27:44:a0
+          ipv4:
+            enabled: false
+          ipv6:
+            enabled: false
+          link-aggregation:
+            mode: 802.3ad
+            port:
+              - eno1
+              - eno2
+              - eno3
+              - eno4
+      dns-resolver:
+        config:
+          server:
+            - 10.1.10.11
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 10.1.90.1
+            next-hop-interface: bond0.90
+            table-id: 254
+  - hostname: compute1
+    role: master
+    interfaces:
+      - name: eno1
+        macAddress: 24:6e:96:6f:8c:b4
+      - name: eno2
+        macAddress: 24:6e:96:6f:8c:b5
+      - name: eno3
+        macAddress: 24:6e:96:6f:8c:b6
+      - name: eno4
+        macAddress: 24:6e:96:6f:8c:b7
+    networkConfig:
+      interfaces:
+        - name: bond0.90
+          type: vlan
+          state: up
+          vlan:
+            base-iface: bond0
+            id: 90
+            protocol: 802.1q
+          ipv4:
+            enabled: true
+            address:
+              - ip: 10.1.90.14
+                prefix-length: 24
+            dhcp: false
+        - name: bond0
+          description: bond eno1 eno2 eno3 eno4
+          type: bond
+          state: up
+          mac-address: 24:6e:96:6f:8c:b4
+          ipv4:
+            enabled: false
+          ipv6:
+            enabled: false
+          link-aggregation:
+            mode: 802.3ad
+            port:
+              - eno1
+              - eno2
+              - eno3
+              - eno4
+      dns-resolver:
+        config:
+          server:
+            - 10.1.10.11
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 10.1.90.1
+            next-hop-interface: bond0.90
+            table-id: 254
+  - hostname: compute2
+    role: master
+    interfaces:
+      - name: eno1
+        macAddress: 24:6e:96:6f:8e:30
+      - name: eno2
+        macAddress: 24:6e:96:6f:8e:31
+      - name: eno3
+        macAddress: 24:6e:96:6f:8e:32
+      - name: eno4
+        macAddress: 24:6e:96:6f:8e:33
+    networkConfig:
+      interfaces:
+        - name: bond0.90
+          type: vlan
+          state: up
+          vlan:
+            base-iface: bond0
+            id: 90
+            protocol: 802.1q
+          ipv4:
+            enabled: true
+            address:
+              - ip: 10.1.90.15
+                prefix-length: 24
+            dhcp: false
+        - name: bond0
+          description: bond eno1 eno2 eno3 eno4
+          type: bond
+          state: up
+          mac-address: 24:6e:96:6f:8e:30
+          ipv4:
+            enabled: false
+          ipv6:
+            enabled: false
+          link-aggregation:
+            mode: 802.3ad
+            port:
+              - eno1
+              - eno2
+              - eno3
+              - eno4
+      dns-resolver:
+        config:
+          server:
+            - 10.1.10.11
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 10.1.90.1
+            next-hop-interface: bond0.90
+            table-id: 254
