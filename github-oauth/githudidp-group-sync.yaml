@@ -1,0 +1,13 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: GroupSync
+metadata:
+  name: github-groupsync
+  namespace: group-sync-operator
+spec:
+  providers:
+  - name: githubidp
+    github:
+      organization: nirlep-org
+      credentialsSecret:
+        name: github-group-sync-secret
+        namespace: group-sync-operator
